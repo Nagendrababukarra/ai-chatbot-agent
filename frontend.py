@@ -45,7 +45,7 @@ st.markdown("""
 st.markdown('<div class="main-title">🤖 AI Chatbot Agent Pro</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Groq / OpenAI Powered | LangGraph + FastAPI</div>', unsafe_allow_html=True)
 
-API_URL = "http://127.0.0.1:9999/chat"
+API_URL = "https://ai-chatbot-agent.onrender.com/chat"
 
 # SIDEBAR CONFIGURATION
 
