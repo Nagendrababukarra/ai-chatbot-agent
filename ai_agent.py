@@ -27,34 +27,53 @@ from langchain_core.messages.ai import AIMessage
 system_prompt="Act as an AI chatbot who is smart and friendly"
 
 def get_response_from_ai_agent(llm_id, query, allow_search, system_prompt, provider):
+    try:
+        if provider == "Groq":
+            if not GROQ_API_KEY:
+                return "GROQ_API_KEY is not set in Render environment."
+            llm = ChatGroq(model=llm_id)
 
-    if provider == "Groq":
-        llm = ChatGroq(model=llm_id)
-    elif provider == "OpenAI":
-        llm = ChatOpenAI(model=llm_id)
+        elif provider == "OpenAI":
+            if not OPENAI_API_KEY:
+                return "OPENAI_API_KEY is not set in Render environment."
+            llm = ChatOpenAI(model=llm_id)
 
-    tools = [TavilySearchResults(max_results=2)] if allow_search else []
+        else:
+            return "Invalid model provider."
 
-    agent = create_react_agent(
-        model=llm,
-        tools=tools
-    )
+        tools = []
+        if allow_search:
+            if not TAVILY_API_KEY:
+                return "TAVILY_API_KEY is not set."
+            tools = [TavilySearchResults(max_results=2)]
 
-    if system_prompt.strip():
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query[0]}
+
+        agent = create_react_agent(
+            model=llm,
+            tools=tools
+        )
+
+        if system_prompt.strip():
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": query[0]}
+            ]
+        else:
+            messages = [
+                {"role": "user", "content": query[0]}
+            ]
+
+        state = {"messages": messages}
+
+        response = agent.invoke(state)
+
+        messages = response.get("messages")
+        ai_messages = [
+            m.content for m in messages
+            if isinstance(m, AIMessage)
         ]
-    else:
-        messages = [
-            {"role": "user", "content": query[0]}
-        ]
 
-    state = {"messages": messages}
+        return ai_messages[-1] if ai_messages else "No response generated."
 
-    response = agent.invoke(state)
-    messages = response.get("messages")
-
-    ai_messages = [m.content for m in messages if isinstance(m, AIMessage)]
-
-    return ai_messages[-1]
+    except Exception as e:
+        return f"Error: {str(e)}"
