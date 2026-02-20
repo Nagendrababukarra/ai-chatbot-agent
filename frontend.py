@@ -61,7 +61,7 @@ with st.sidebar:
     provider = st.radio("Select Provider", ["Groq", "OpenAI"])
 
     MODELS = {
-        "Groq": ["llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+        "Groq": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"],
         "OpenAI": ["gpt-4o-mini"]
     }
 
